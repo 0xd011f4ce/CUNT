@@ -1,5 +1,5 @@
 #+DATE: 2023-12-20T14:57:03-05:00
-#+LAST_MODIFIED: 2023-12-20 Wed 15:57:46
+#+LAST_MODIFIED: 2023-12-20 Wed 16:03:02
 
 * CUNT
 
@@ -161,6 +161,8 @@ values are the same, in this case we are comparing two vector2 elements.
   - [ ] Maybe add support for Jansson and add something like
     ~COMPILE_JANSSON_SUPPORT~ as header guards to avoid it being bloated when it's
     not necessary?
+- [ ] Maybe some kind of export? To like XML or YAML
+  - These would also be optional like the jansson, so it is unnecessary bloated.
 - [ ] Fix some valgrind errors, it shows a looot of invalid reads, and well,
   eventually it will be cleaner, so I'll be doing that little by little
 
