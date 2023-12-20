@@ -1,6 +1,157 @@
 #+DATE: 2023-12-20T14:57:03-05:00
-#+LAST_MODIFIED: 2023-12-20 Wed 14:57:42
+#+LAST_MODIFIED: 2023-12-20 Wed 15:39:01
 
 * CUNT
 
-C UNit Testing
+CUNT (C UNit Testing) is a small C library to do tests in our C projects:
+
+[[file:resources/ss.png]]
+
+** Usage
+
+I wanted to make CUNT as small as possible, so to use it you only need to
+download the ~test.c~ and ~test.h~ files, compile ~test.c~ and include it to every
+test file that you have, i.e:
+
+#+begin_src bash
+  gcc test.o test_tree.o -o test_tree
+#+end_src
+
+*** API
+
+Again, CUNT is meant to be simple to use, so you will be always calling macros
+instead of functions. To get started you just need to add ~TEST_START~ and
+~TEST_END~ in your ~main~ function:
+
+#+begin_src C
+  #include "test.h"
+
+  int
+  main (void)
+  {
+    TEST_START ();
+    TEST_END ();
+
+    return 0;
+  }
+#+end_src
+
+And now you just have to register your tests.
+
+To register a test you use the ~TEST~ macro, it looks like if you were declaring a
+function, so you would do:
+
+#+begin_src C
+  TEST (test_strings)
+  {
+    /* tests go here */
+  }
+#+end_src
+
+And to add items to test you use the ~TEST_ASSERT~ macro, the tests work in a very
+simple way, they just check if something is true or false, so you would use this
+macro like this:
+
+#+begin_src C
+  TEST_ASSERT ("name of the test go here", 2 + 2 == 5, test_strings);
+#+end_src
+
+Even if it's that simple, I think the "/power/" of CUNT is in its generic
+functions to add tests, for example, if you want to check if two strings are
+equal, yo would use the ~ASSERT_STR_EQ~ as the expression parameter, like this:
+
+#+begin_src C
+  TEST_ASSERT ("check if base64 'asdf' is 'YXNkZg=='",
+               ASSERT_STR_EQ (converted, "YXNkZg==), test_strings);
+#+end_src
+
+That could be useful if maybe you have a function that converts a string to its
+base64 form, and you are checking between the ~converted~ variable and the string
+that we entered.
+
+You can also compare if two arrays the equal, but this one is a little more
+complicated, for this we use the ~ASSERT_ARR_EQ~ macro as expression, and it works
+like this:
+
+#+begin_src C
+  TEST (array_tests)
+  {
+    int arr[] = { 1, 2, 3, 4 };
+
+    TEST_ASSERT ("check if [1, 2, 3, 4] == [1, 2, 3, 4]",
+                 ASSERT_ARR_EQ (arr, arr, 4, sizeof (int), ASSERT_INT_ARRCMP),
+                 array_tests);
+  }
+#+end_src
+
+Now that's much larger, let me explain how ~ASSERT_ARR_EQ~ works, as we do not
+have a way to check the type of a variable in C, this works in a very generic
+way (as I made it thinking primarily in structs), the first two arguments are
+the two arrays that we want to check, the next one is the number of elements (it
+doesn't matter if one has more than the others, it won't segfault it will just
+say false and that's it), the next argument is the size of each individual
+element, in the previous example it's an int and the last argument is a function
+that will make the comparison, CUNT provides some functions to check different
+datatypes in an array:
+- *ASSERT_INT_ARRCMP:* Compares two integer arrays
+- *ASSERT_FLOAR_ARRCMP:* Compares two floats
+
+But if you have a different datatype (like a structure) you can create your own
+function, for example:
+
+#+begin_src C
+  struct vector2
+  {
+    int x, y;
+  };
+
+  _Bool
+  are_two_vec2_equals (const void *vector1, const void *vector2)
+  {
+    if (!vector1 || !vector2)
+      return 0;
+
+    struct vec2 *v1 = (struct vec2 *)vector1;
+    struct vec2 *v2 = (struct vec2 *)vector2;
+
+    return v1->x == v2->y && v1->y == v2->y;
+  }
+
+  TEST (test_arrays_custom_structures)
+  {
+    struct vec2 pos1[] = { { 0, 0 }, { 1, 1 } };
+    size_t count = sizeof (pos1) / sizeof (struct vec2);
+
+    TEST_ASSERT ("check if vector2 (ZERO, ONE) == vector2 (ZERO, ONE)",
+                 ASSERT_ARR_EQ (pos1, pos1, count, sizeof (struct vec2),
+                                are_two_vec2_equals),
+                 test_arrays_custom_structures);
+  }
+#+end_src
+
+(this code is taken from /tests/basic.c/, check that for further reference)
+
+The prototype that the comparison function takes is
+~void (*fn) (const void *, const void *)~, it accepts two elements (one for each
+item in the array) and now it's - unfortunately - your job to check if the
+values are the same, in this case we are comparing two vector2 elements.
+
+** TODO
+
+- [ ] Add more types for generic testing.
+  - [ ] Maybe add support for Jansson and add something like
+    ~COMPILE_JANSSON_SUPPORT~ as header guards to avoid it being bloated when it's
+    not necessary?
+- [ ] Fix some valgrind errors, it shows a looot of invalid reads, and well,
+  eventually it will be cleaner, so I'll be doing that little by little
+
+** FAQ
+
+*** Why the  name?
+
+If [[https://github.com/Roger/escrotum][escrotum]] exists, I can name my projects however I want.
+
+*** Why unit testing?
+
+I don't know, it might be useful for some projects like encryption, compilers
+and things like that.
