@@ -1,5 +1,5 @@
 #+DATE: 2023-12-20T14:57:03-05:00
-#+LAST_MODIFIED: 2023-12-20 Wed 15:39:01
+#+LAST_MODIFIED: 2023-12-20 Wed 15:41:14
 
 * CUNT
 
@@ -94,7 +94,7 @@ element, in the previous example it's an int and the last argument is a function
 that will make the comparison, CUNT provides some functions to check different
 datatypes in an array:
 - *ASSERT_INT_ARRCMP:* Compares two integer arrays
-- *ASSERT_FLOAR_ARRCMP:* Compares two floats
+- *ASSERT_FLOAT_ARRCMP:* Compares two floats
 
 But if you have a different datatype (like a structure) you can create your own
 function, for example:
