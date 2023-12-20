@@ -96,6 +96,29 @@ TEST (test_arrays)
       test_arrays);
 }
 
+TEST (test_pass_or_fail)
+{
+  TEST_START_ASSERT ("1 == 2?", test_pass_or_fail);
+  if (1 == 2)
+    {
+      TEST_PASS_ASSERT (test_pass_or_fail);
+    }
+  else
+    {
+      TEST_FAIL_ASSERT (test_pass_or_fail);
+    }
+
+  TEST_START_ASSERT ("1 == 1?", test_pass_or_fail);
+  if (1 == 1)
+    {
+      TEST_PASS_ASSERT (test_pass_or_fail);
+    }
+  else
+    {
+      TEST_FAIL_ASSERT (test_pass_or_fail);
+    }
+}
+
 int
 main (int argc, char **argv)
 {

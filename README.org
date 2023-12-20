@@ -1,5 +1,5 @@
 #+DATE: 2023-12-20T14:57:03-05:00
-#+LAST_MODIFIED: 2023-12-20 Wed 15:41:14
+#+LAST_MODIFIED: 2023-12-20 Wed 15:57:46
 
 * CUNT
 
@@ -54,6 +54,25 @@ macro like this:
 
 #+begin_src C
   TEST_ASSERT ("name of the test go here", 2 + 2 == 5, test_strings);
+#+end_src
+
+There's another way where you can create asserts and set them to passed or
+failed, this is by starting an assert using ~TEST_START_ASSERT~ and then calling
+either ~TEST_PASS_ASSERT~ or ~TEST_FAIL_ASSERT~:
+
+#+begin_src C
+  TEST (test_pass_or_fail)
+  {
+    TEST_START_ASSERT ("1 == 2?", test_pass_or_fail);
+    if (1 == 2)
+      {
+        TEST_PASS_ASSERT (test_pass_or_fail);
+      }
+    else
+      {
+        TEST_FAIL_ASSERT (test_pass_or_fail);
+      }
+  }
 #+end_src
 
 Even if it's that simple, I think the "/power/" of CUNT is in its generic

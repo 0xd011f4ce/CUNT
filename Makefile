@@ -27,5 +27,8 @@ build/test_basic.o: tests/basic.c
 run_basic: build/test_basic.o
 	@$<
 
+valgrind: build/test_basic.o
+	@valgrind $<
+
 clean:
 	@rm -f $(FILES) $(TESTS)

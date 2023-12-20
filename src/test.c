@@ -8,6 +8,8 @@
 static struct test *tests = NULL;
 static unsigned int total_tests = 0;
 
+static struct test_assertion *current_assert = NULL;
+
 /*****************************************************************************/
 /*                          Internal functions only                          */
 /*****************************************************************************/
@@ -86,6 +88,24 @@ test_get_test_by_func (void (*func) ())
   return t;
 }
 
+static void
+test_realloc_asserts (struct test *t)
+{
+  if (!t || !t->asserts)
+    return;
+
+  t->total_asserts++;
+  if (sizeof (t->total_asserts)
+      < sizeof (struct test_assertion) * t->total_asserts + 1)
+    {
+      t->asserts = realloc (
+          t->asserts, sizeof (struct test_assertion) * t->total_asserts + 1);
+
+      if (!t->asserts)
+        return;
+    }
+}
+
 /*****************************************************************************/
 /*                    These are mostly aesthetic things :/                   */
 /*****************************************************************************/
@@ -153,23 +173,59 @@ void
 test_add_assert (const char *name, _Bool expr, void (*test) ())
 {
   struct test *t = test_get_test_by_func (test);
-  if (!t || !t->asserts)
+  if (!t)
     return;
 
-  t->total_asserts++;
-  if (sizeof (t->total_asserts)
-      < sizeof (struct test_assertion) * t->total_asserts + 1)
-    {
-      t->asserts = realloc (
-          t->asserts, sizeof (struct test_assertion) * t->total_asserts + 1);
-
-      if (!t->asserts)
-        return;
-    }
+  test_realloc_asserts (t);
 
   struct test_assertion *ass = &t->asserts[t->total_asserts - 1];
   assert_copy_name (ass, name);
   ass->passed = expr;
+}
+
+void
+test_start_assert (const char *name, void (*test) ())
+{
+  struct test *t = test_get_test_by_func (test);
+  if (!t)
+    return;
+
+  if (current_assert)
+    {
+      fprintf (stderr,
+               "test_start_assert: there's already an assert running\n");
+      return;
+    }
+
+  test_realloc_asserts (t);
+  current_assert = &t->asserts[t->total_asserts - 1];
+  assert_copy_name (current_assert, name);
+}
+
+void
+test_pass_assert (void (*test) ())
+{
+  if (!current_assert)
+    {
+      fprintf (stderr, "test_pass_assert: there's no assert running\n");
+      return;
+    }
+
+  current_assert->passed = 1;
+  current_assert = NULL;
+}
+
+void
+test_fail_assert (void (*test) ())
+{
+  if (!current_assert)
+    {
+      fprintf (stderr, "test_fail_assert: there's no assert running\n");
+      return;
+    }
+
+  current_assert->passed = 0;
+  current_assert = NULL;
 }
 
 void
